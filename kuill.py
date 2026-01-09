@@ -1,7 +1,7 @@
-from kuill.gui import Kuill
+from gui import KuillApp
 
 def main() -> None:
-    app = Kuill()
+    app = KuillApp(databasePath = "kuill.json")
     app.run()
 
 if __name__ == "__main__":

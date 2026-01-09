@@ -3,13 +3,13 @@ Screen {
 }
 
 #search_row {
-    height: 3;
-    padding: 0 1;
-    align: left middle;
+    height: auto;
+    padding: 1 2;
+    align: center middle;
 }
 
 #search_label {
-    width: 8;
+    width: auto;
     height: 3;
     content-align: left middle;
     margin-right: 1;
@@ -19,27 +19,22 @@ Screen {
     width: 1fr;
 }
 
-#body {
+#main_body {
+    width: 1fr;
     height: 1fr;
     padding: 0 1 1 1;
 }
 
 #results_block, #details_block {
     height: 1fr;
-    border: solid $primary;
+    border: round $primary;
     padding: 1;
 }
 
 #results_block {
     width: 3fr;
-    margin-right: 1;
 }
 
 #details_block {
     width: 1fr;
-}
-
-#results_label, #details_label {
-    text-style: bold;
-    /*margin-bottom: 1;*/
 }
