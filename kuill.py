@@ -1,8 +1,6 @@
-from gui import KuillApp
-
-def main() -> None:
-    app = KuillApp(databasePath = "kuill.json")
-    app.run()
+import sys
+from app.gui import KuillApp
 
 if __name__ == "__main__":
-    main()
+    app = KuillApp(databasePath = sys.argv[1])
+    app.run()

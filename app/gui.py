@@ -4,37 +4,27 @@ from textual.binding import Binding
 from textual.containers import Horizontal, Vertical
 from textual.widgets import Header, Footer, Label, Input, DataTable, Markdown
 
-import database
+import app.kdb as kdb
 
 class KuillApp(App):
-    ##########################################
-    # Constants
-    ##########################################
+    ###* Constants *###
 
-    # define CSS path to load app styles
-    CSS_PATH = "styles.tcss"
-
-    # define keybindings
+    CSS_PATH = "styles.tcss" # CSS file containing the app style
     BINDINGS = [
-        Binding("/", "focus_search", "Search", show = True), # focus the search bar
+        Binding("/", "focus_search", "Search", show = True), # kb to focus the search bar
     ]
 
-    ##########################################
-    # Initialization
-    ##########################################
+    ###* Initialization *###
 
     def __init__(self, databasePath: str) -> None:
-        super().__init__()
-
+        super().__init__() # init parent class
         self.DatabasePath = databasePath
     
-    ##########################################
-    # App Layout
-    ##########################################
+    ###* App Layout *###
 
     def compose(self) -> ComposeResult:
         # set title and subtitle
-        self.title = "Kuill v0.1.0"
+        self.title = "Kuill v0.1.2"
         self.sub_title = "A simple open source tool to organize your scientific knowledge."
 
         # header
@@ -42,7 +32,7 @@ class KuillApp(App):
         yield self.Header
 
         # search row (label + input)
-        self.SearchRow = Horizontal(id = "search_row") # horizontal search row
+        self.SearchRow = Horizontal(id = "search_row")
         with self.SearchRow:
             self.SearchLabel = Label(id = "search_label", content = "Search:")
             self.SearchInput = Input(id = "search_input", placeholder = "Author(s), Title, Venue, Year, Keywords")
@@ -83,7 +73,7 @@ class KuillApp(App):
     # load database from JSON file and populate results table
     def _load_database(self):
         # load JSON file
-        self.Database = database.LoadJSON(self.DatabasePath)
+        self.Database = kdb.LoadJSON(self.DatabasePath)
 
         # populate results tabel
         for article in self.Database.ArticlesList:
