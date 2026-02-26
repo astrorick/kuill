@@ -1,19 +1,36 @@
 import json
 import os
 
-# The Article class represent a single bibliography entry in the library.
 class Article:
-    def __init__(self, authors: list[str], title: str, venue: str, year: int, doi: str, keywords: list[str], pdf: str):
+    """
+    The Article class represent a single bibliography entry in the library.
+    """
+
+    Authors: list[str]
+    Title: str
+    Venue: str
+    Year: int
+    DOI: str
+    Keywords: list[str]
+    PDFPath: str
+
+    def __init__(self, authors: list[str], title: str, venue: str, year: int, doi: str, keywords: list[str], pdfPath: str):
         self.Authors = authors
         self.Title = title
         self.Venue = venue
         self.Year = year
         self.DOI = doi
         self.Keywords = keywords
-        self.PDF = pdf
+        self.PDFPath = pdfPath
 
-# The Library class represents the full database object countaining all your entries plus additional data.
 class Library:
+    """
+    The Library class represents the full database object countaining all your entries plus additional data.
+    """
+    
+    DatabasePath: str
+    ArticlesList: list[Article]
+
     def __init__(self, databasePath: str):
         # raise exception if file does not exists
         if not os.path.exists(databasePath):
@@ -33,7 +50,7 @@ class Library:
                     year = article["year"],
                     doi = article["doi"],
                     keywords = article["keywords"],
-                    pdf = article["pdf"]
+                    pdfPath = article["pdf"]
             ))
         
         # set class attributes

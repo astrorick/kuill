@@ -1,9 +1,16 @@
+# standard imports
+import os
+import subprocess
+import sys
+
+# textual imports
 from textual import on
 from textual.app import App, ComposeResult
 from textual.binding import Binding
 from textual.containers import Horizontal, Vertical
-from textual.widgets import Header, Footer, Label, Input, DataTable, Markdown
+from textual.widgets import Header, Footer, Label, Input, DataTable, Markdown, Button
 
+# kuill imports
 import app.kdb as kdb
 
 class KuillApp(App):
@@ -18,7 +25,9 @@ class KuillApp(App):
 
     def __init__(self, databasePath: str) -> None:
         super().__init__() # init parent class
+
         self.DatabasePath = databasePath
+        self.Library = kdb.Library(databasePath = databasePath) # load database from path
     
     ###* App Layout *###
 
@@ -42,62 +51,60 @@ class KuillApp(App):
         # app body (results table + details panel)
         self.MainBody = Horizontal(id = "main_body") # stack main body panes horizontally
         with self.MainBody:
-            # results block (label + table)
-            self.ResultsBlock = Vertical(id = "results_block") # stack results block elements vertically
-            self.ResultsBlock.border_title = "Results"
+            # results block (table)
+            self.ResultsBlock = Vertical(id = "results_block") # container for data table
+            self.ResultsBlock.border_title = "Results Table"
             with self.ResultsBlock:
                 self.ResultsTable = DataTable(id = "results_table")
                 self.ResultsTable.cursor_type = "row"
                 self.ResultsTable.add_columns("First Author", "Title", "Venue", "Year", "Keywords")
                 yield self.ResultsTable
 
-            # details block (label + panel)
-            self.DetailsBlock = Vertical(id = "details_block") # stack details block elements vertically
+            # details block (markdown)
+            self.DetailsBlock = Vertical(id = "details_block") # container for details panel
             self.DetailsBlock.border_title = "Details"
             with self.DetailsBlock:
                 self.DetailsMarkdown = Markdown(id = "details_markdown", markdown = "Select an entry to see detailed information here.")
                 yield self.DetailsMarkdown
+
+                # open PDF button (starts disabled until an entry is selected)
+                self.OpenButtonBlock = Horizontal(id = "open_button_block")
+                with self.OpenButtonBlock:
+                    self.OpenButton = Button(label = "Open PDF", id = "open_button", disabled = True)
+                    yield self.OpenButton
 
         # footer
         self.Footer = Footer()
         yield self.Footer
 
     def on_mount(self) -> None:
-        # load database once at startup
-        self._load_database()
+        """Populate the results table once at strartup."""
 
-    ##########################################
-    # Database Handling
-    ##########################################
-
-    # load database from JSON file and populate results table
-    def _load_database(self):
-        # load JSON file
-        self.Database = kdb.LoadJSON(self.DatabasePath)
-
-        # populate results tabel
-        for article in self.Database.ArticlesList:
+        for article in self.Library.ArticlesList:
             self.ResultsTable.add_row(
-                ", ".join(article.Authors),
+                article.Authors[0], # only display first author in the table
                 article.Title,
                 article.Venue,
                 article.Year,
-                ", ".join(article.Keywords)
+                ", ".join(article.Keywords),
             )
 
-    ##########################################
-    # Results Table and Info Panel Logic
-    ##########################################
+    ###* Results Table & Details Panel Logic *###
     
     # render the details of the selected element in the results table in the details panel
     def _render_details(self) -> None:
         # fallback to defaults if no valid row is selected
-        if self.ResultsTable.cursor_row is None or self.ResultsTable.cursor_row < 0 or self.ResultsTable.cursor_row >= len(self.Database.ArticlesList):
-            self.DetailsMarkdown.update("Select a paper to see details here.")
+        if self.ResultsTable.cursor_row is None or self.ResultsTable.cursor_row < 0 or self.ResultsTable.cursor_row >= len(self.Library.ArticlesList):
+            self.DetailsMarkdown.update("Select an entry to see detailed information here.")
+            # disable open button when nothing selected
+            self.OpenButton.disabled = True
+            self._currently_selected_pdf_path = None
             return
         
         # extract info from table entry
-        article = self.Database.ArticlesList[self.ResultsTable.cursor_row]
+        article = self.Library.ArticlesList[self.ResultsTable.cursor_row]
+        self.OpenButton.disabled = False
+        self._currently_selected_pdf_path = "/".join(["library", article.PDFPath])
         self.DetailsMarkdown.update(
             "\n\n".join(
                 [
@@ -106,7 +113,7 @@ class KuillApp(App):
                     f"**Venue:** {article.Venue}",
                     f"**Year:** {article.Year}",
                     f"**Keywords:** {', '.join(article.Keywords)}",
-                    f"**PDF:** {article.PDF}",
+                    f"**PDF Path:** {article.PDFPath}",
                 ]
             )
         )
@@ -116,9 +123,23 @@ class KuillApp(App):
     def _on_row_highlighted(self) -> None:
         self._render_details()
 
-    ##########################################
-    # Keybindings
-    ##########################################
+    # open button pressed handler
+    @on(Button.Pressed, "#open_button")
+    def _on_open_pressed(self) -> None:
+        """Launch the PDF associated with the currently selected entry."""
+
+        if self._currently_selected_pdf_path:
+            try:
+                if sys.platform.startswith("darwin"):
+                    subprocess.run(["open", self._currently_selected_pdf_path]) # TODO: test on Darwin
+                elif sys.platform.startswith("win"):
+                    os.startfile(self._currently_selected_pdf_path) # TODO: test on Windows
+                else:
+                    subprocess.run(["xdg-open", self._currently_selected_pdf_path]) #* TESTED
+            except Exception:
+                pass
+
+    ###* Keybindings *###
 
     def action_focus_search(self) -> None:
         self.query_one("#search_input", Input).focus()
