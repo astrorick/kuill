@@ -13,5 +13,5 @@ Screen {
 #results_block { width: 3fr; }
 #details_block { width: 1fr; layout: vertical; }
 #details_markdown { height: 1fr; }
-#open_button_block { height: auto; width: 1fr; align: right; }
+/*#open_button_block { height: auto; width: 1fr; align: right; }*/
 #open_button { margin-top: 1; }

@@ -1,0 +1,25 @@
+{
+    "database_version": "0.1.0",
+    "articles_list": [
+        {
+            "authors": ["Mock Author 1", "Mock Author 2"],
+            "title": "Mock Paper Title 1",
+            "venue": "Mock Venue 1",
+            "year": 2001,
+            "doi": "mock/doi/1",
+            "keywords": ["Stuff", "Magic", "Humans"],
+            "pdf": "library/mockpdf1.pdf",
+            "read": true
+        },
+        {
+            "authors": ["Mock Author 3", "Mock Author 4", "Mock Author 5"],
+            "title": "Mock Paper Title 2",
+            "venue": "Mock Venue 2",
+            "year": 2002,
+            "doi": "mock/doi/2",
+            "keywords": ["Humans", "Animals", "Earth"],
+            "pdf": "library/mockpdf2.pdf",
+            "read": false
+        }
+    ]
+}
