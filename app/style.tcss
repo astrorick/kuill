@@ -7,19 +7,15 @@ Screen {
 #library_info_row {
     width: 1fr; height: auto;
     align: center middle;
+    padding: 1 1 1 1;
 
     #library_info_row_key_label {
-        width: auto; height: 100%;
-        content-align-vertical: middle;
+        width: auto; height: auto;
         margin: 0 1 0 0;
     }
     #library_info_row_value_label {
-        width: 1fr; height: 100%;
-        content-align-vertical: middle;
-        text-style: bold; color: $accent
-    }
-    #library_info_row_refresh_button {
-        width: auto; height: auto;
+        width: auto; height: 100%;
+        text-style: bold; color: $primary
     }
 }
 
@@ -27,6 +23,7 @@ Screen {
 #search_row {
     width: 1fr; height: auto;
     align: center middle;
+    padding: 0 0 0 1;
 
     #search_row_key_label {
         width: auto; height: 100%;
@@ -51,6 +48,10 @@ Screen {
     #details_block {
         width: 1fr; height: 1fr;
         border: round $primary;
-        padding: 1 1 1 1;
+
+        #details_open_pdf_button {
+            width: 1fr; height: auto;
+            margin: 0 1 0 1
+        }
     }
 }

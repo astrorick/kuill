@@ -1,14 +1,14 @@
 # standard imports
 import os
+import platform
 import subprocess
-import sys
 
 # textual imports
 from textual import on
 from textual.app import App, ComposeResult
 from textual.binding import Binding
-from textual.containers import Horizontal, Vertical
-from textual.widgets import Button, DataTable, Footer, Header, Input, Label, Markdown, Select
+from textual.containers import Horizontal, Vertical, VerticalScroll
+from textual.widgets import Button, DataTable, Footer, Header, Input, Label, Markdown
 
 # kuill imports
 import app.lib as lib
@@ -18,8 +18,8 @@ class KuillApp(App):
 
     CSS_PATH = "style.tcss" # CSS file containing the app style
     BINDINGS = [
-        Binding("d", "toggle_dark", "Toggle dark mode"), # toggle dark mode
-        Binding("/", "focus_search", "Search", show = True), # focus the search bar
+        Binding("d", "toggle_dark", "dark mode", tooltip = "Toggle dark mode"),
+        Binding("s", "focus_search", "search", tooltip = "Focus the search bar"),
     ]
 
     ###* Initialization *###
@@ -32,39 +32,42 @@ class KuillApp(App):
 
     def compose(self) -> ComposeResult:
         # header
-        yield Header(id = "header", show_clock = True)
+        self.Header = Header(id = "header", show_clock = True)
+        yield self.Header
 
         # library info row
-        yield Horizontal(
-            Label(id = "library_info_row_key_label", content = "Library File:"),
-            Label(id = "library_info_row_value_label", content = self.Library.LibraryFilePath),
-            Button(id = "library_info_row_refresh_button", label = "Refresh"),
-            id = "library_info_row",
-        )
+        self.LibraryInfoRow = Horizontal(id = "library_info_row")
+        with self.LibraryInfoRow:
+            self.LibraryInfoRowKeyLabel = Label(id = "library_info_row_key_label", content = "Library File:")
+            self.LibraryInfoRowValueLabel = Label(id = "library_info_row_value_label", content = self.Library.LibraryFilePath)
+            yield self.LibraryInfoRowKeyLabel
+            yield self.LibraryInfoRowValueLabel
 
         # search row
-        yield Horizontal(
-            Label(id = "search_row_key_label", content = "Search:"),
-            Input(id = "search_row_search_input", placeholder = "Author(s), Title, Venue, Year, Keywords"),
-            id = "search_row"
-        )
+        self.SearchRow = Horizontal(id = "search_row")
+        with self.SearchRow:
+            self.SearchRowKeyLabel = Label(id = "search_row_key_label", content = "Search:")
+            self.SearchRowSearchInput = Input(id = "search_row_search_input", placeholder = "Author(s), Title, Venue, Year, Keywords")
+            yield self.SearchRowKeyLabel
+            yield self.SearchRowSearchInput
 
         # main app body
-        yield Horizontal(
-            Vertical(
-                DataTable(id = "results_table", cursor_type = "row"),
-                id = "results_block"
-            ),
-            Vertical(
-                Markdown(id = "details_markdown"),
-                Button(id = "details_open_button", label = "Open PDF"),
-                id = "details_block"
-            ),
-            id = "main_body"
-        )
+        self.MainBody = Horizontal(id = "main_body")
+        with self.MainBody:
+            self.ResultsBlock = Vertical(id = "results_block")
+            with self.ResultsBlock:
+                self.ResultsTable = DataTable(id = "results_table", cursor_type = "row", fixed_columns = 1)
+                yield self.ResultsTable
+            self.DetailsBlock = VerticalScroll(id = "details_block")
+            with self.DetailsBlock:
+                self.DetailsMarkdown = Markdown(id = "details_markdown")
+                self.DetailsOpenPDFButton = Button(id = "details_open_pdf_button", label = "Open PDF")
+                yield self.DetailsMarkdown
+                yield self.DetailsOpenPDFButton
 
         # footer
-        yield Footer(id = "footer", show_command_palette = False)
+        self.Footer = Footer(id = "footer", show_command_palette = False)
+        yield self.Footer
 
     def on_mount(self) -> None:
         # set title and subtitle
@@ -72,72 +75,72 @@ class KuillApp(App):
         self.sub_title = "A simple open source tool to organize your scientific knowledge."
 
         # set border titles
-        self.query_exactly_one("#results_block", Vertical).border_title = "Results Table"
-        self.query_exactly_one("#details_block", Vertical).border_title = "Details"
+        self.ResultsBlock.border_title = "Results Table"
+        self.DetailsBlock.border_title = "Details"
 
         # populate the results table once at startup
-        self.query_exactly_one("#results_table", DataTable).add_columns("First Author", "Title", "Venue", "Year", "Keywords")
-        #for article in self.Library.ArticlesList:
-        #    self.ResultsTable.add_row(
-        #        article.Authors[0], # only display first author in the table
-        #        article.Title,
-        #        article.Venue,
-        #        article.Year,
-        #        ", ".join(article.Keywords),
-        #    )
-
+        self.ResultsTable.add_columns("ID", "First Author", "Title", "Venue", "Year", "Keywords")
+        self._refresh_results_table(self.Library.ArticlesList)
+        
         # focus search bar
-        self.query_exactly_one("#search_row_search_input", Input).focus()
+        self.SearchRowSearchInput.focus()
+
+    ###* Search Row Logic *###
+
+    @on(Input.Changed, "#search_row_search_input")
+    def _on_search_row_search_input_changed(self) -> None:
+        isRegexValid, filteredArticlesList = self.Library.FilteredArticlesList()
+
+        if not isRegexValid:
+            # TODO: red search box
+            return
+        
+        self._refresh_results_table(filteredArticlesList)
 
     ###* Results Table & Details Panel Logic *###
+
+    # refresh results table entries
+    def _refresh_results_table(self, articlesList: list[lib.Article]) -> None:
+        self.ResultsBlock.border_title = f"Results Table - {len(articlesList)}/{len(self.Library.ArticlesList)}"
+        self.ResultsTable.clear()
+        for article in articlesList:
+            self.ResultsTable.add_row(
+                article.ID,
+                article.Authors[0], # only display first author in the table
+                article.Title,
+                article.Venue,
+                article.Year,
+                ", ".join(article.Keywords),
+            )
     
-    # render the details of the selected element in the results table in the details panel
-    #def _render_details(self) -> None:
-    #    # fallback to defaults if no valid row is selected
-    #    if self.ResultsTable.cursor_row is None or self.ResultsTable.cursor_row < 0 or self.ResultsTable.cursor_row >= len(self.Library.ArticlesList):
-    #        self.DetailsMarkdown.update("Select an entry to see detailed information here.")
-    #        # disable open button when nothing selected
-    #        self.OpenButton.disabled = True
-    #        self._currently_selected_pdf_path = None
-    #        return
-    #    
-    #    # extract info from table entry
-    #    article = self.Library.ArticlesList[self.ResultsTable.cursor_row]
-    #    self.OpenButton.disabled = False
-    #    self._currently_selected_pdf_path = "/".join(["library", article.PDFPath])
-    #    self.DetailsMarkdown.update(
-    #        "\n\n".join(
-    #            [
-    #                f"# {article.Title}",
-    #                f"**Authors:** {', '.join(article.Authors)}",
-    #                f"**Venue:** {article.Venue}",
-    #                f"**Year:** {article.Year}",
-    #                f"**Keywords:** {', '.join(article.Keywords)}",
-    #                f"**PDF Path:** {article.PDFPath}",
-    #            ]
-    #        )
-    #    )
+    # render the details of the selected element of the results table in the details panel
+    def _render_article_details(self) -> None:
+        article = self._get_article_by_ID(self.ResultsTable.get_row_at(self.ResultsTable.cursor_row)[0])
+        self.DetailsMarkdown.update(
+            "\n\n".join(
+                [
+                    f"# {article.Title}",
+                    f"**Authors:** {', '.join(article.Authors)}",
+                    f"**Venue:** {article.Venue}",
+                    f"**Year:** {article.Year}",
+                    f"**Keywords:** {', '.join(article.Keywords)}",
+                    f"**Added**: {article.Added}",
+                    f"**PDF Path:** {article.PDF}",
+                    f"**Notes**: {article.Notes}"
+                ]
+            )
+        )
     
     # action to execute when the selected row on the results table changes
-    #@on(DataTable.RowHighlighted, "#results_table")
-    #def _on_row_highlighted(self) -> None:
-    #    self._render_details()
+    @on(DataTable.RowHighlighted, "#results_table")
+    def _on_result_table_row_highlighted(self) -> None:
+        self._render_article_details()
 
-    # open button pressed handler
-    #@on(Button.Pressed, "#open_button")
-    #def _on_open_pressed(self) -> None:
-    #    """Launch the PDF associated with the currently selected entry."""
-    #
-    #    if self._currently_selected_pdf_path:
-    #        try:
-    #            if sys.platform.startswith("darwin"):
-    #                subprocess.run(["open", self._currently_selected_pdf_path]) # TODO: test on Darwin
-    #            elif sys.platform.startswith("win"):
-    #                os.startfile(self._currently_selected_pdf_path) # TODO: test on Windows
-    #            else:
-    #                subprocess.run(["xdg-open", self._currently_selected_pdf_path]) #* TESTED
-    #        except Exception:
-    #            pass
+    # action to execute when the open pdf button is pressed
+    @on(Button.Pressed, "#details_open_pdf_button")
+    def _on_details_open_pdf_button_pressed(self) -> None:
+        article = self._get_article_by_ID(self.ResultsTable.get_row_at(self.ResultsTable.cursor_row)[0])
+        self._open_PDF_on_system("/".join([self.Library.LibraryFolderPath, article.PDF]))
 
     ###* Keybindings *###
 
@@ -145,4 +148,27 @@ class KuillApp(App):
         self.theme = ("textual-dark" if self.theme == "textual-light" else "textual-light")
 
     def action_focus_search(self) -> None:
-        self.query_exactly_one("#search_row_search_input", Input).focus()
+        self.SearchRowSearchInput.focus()
+
+    ###* Utilities *###
+
+    # get article from library based on article ID
+    def _get_article_by_ID(self, articleID: int) -> lib.Article:
+        return next((a for a in self.Library.ArticlesList if a.ID == articleID), None)
+    
+    # open the pdf pointed at by the provided path using the appropriate system process
+    def _open_PDF_on_system(self, pdfPath: str) -> bool:
+        systemType = platform.system()
+
+        if systemType not in ["Windows", "Linux", "Darwin"]:
+            self.notify(title = "Warning!", message = f"Unsupported OS '{platform.system()}'", severity = "warning")
+            return False
+        
+        if systemType == "Windows":
+            os.startfile(pdfPath) #* TESTED
+        elif systemType == "Linux":
+            subprocess.call(('xdg-open', pdfPath)) #* TESTED
+        elif systemType == "Darwin":
+            subprocess.call(("open", pdfPath)) # TODO: to be tested
+        
+        return True

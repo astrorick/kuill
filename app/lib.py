@@ -1,27 +1,34 @@
 import json
 import os
+import re
 
 class Article:
     """
     The Article class represent a single bibliography entry in the library.
     """
 
+    ID: int
     Authors: list[str]
     Title: str
     Venue: str
     Year: int
     DOI: str
     Keywords: list[str]
+    Added: str
     PDF: str
+    Notes: str
 
-    def __init__(self, authors: list[str], title: str, venue: str, year: int, doi: str, keywords: list[str], pdf: str):
+    def __init__(self, id: int, authors: list[str], title: str, venue: str, year: int, doi: str, keywords: list[str], added: str, pdf: str, notes: str):
+        self.ID = id
         self.Authors = authors
         self.Title = title
         self.Venue = venue
         self.Year = year
         self.DOI = doi
         self.Keywords = keywords
+        self.Added = added
         self.PDF = pdf
+        self.Notes = notes
 
 class Library:
     """
@@ -49,18 +56,59 @@ class Library:
 
         # populate articles list with data
         articlesList = []
-        for article in libData["articles_list"]:
+        for id, article in enumerate(libData["articles_list"]):
             articlesList.append(Article(
+                id = id,
                 authors = article["authors"],
                 title = article["title"],
                 venue = article["venue"],
                 year = article["year"],
                 doi = article["doi"],
                 keywords = article["keywords"],
-                pdf = article["pdf"]
+                added = article["added"],
+                pdf = article["pdf"],
+                notes = article["notes"],
             ))
         
         # set class attributes
         self.LibraryFilePath = libraryFilePath
         self.LibraryFolderPath = os.path.dirname(libraryFilePath)
         self.ArticlesList = articlesList
+
+    def FilteredArticlesList(self, regex: str) -> tuple[bool, list[Article]]:
+        """
+        Return a list of :class:`Article` instances where at least one of the selected fields matches the provided regular expression.
+
+        The fields examined are ``authors`` (each author name), ``title``, ``venue``, ``year`` and ``keywords`` (each keyword evaluated separately).
+        
+        The pattern can appear anywhere in the fields and matching is case-insensitive.
+        """
+        
+        try:
+            pattern = re.compile(regex, re.IGNORECASE)
+        except:
+            return False, []
+
+        # helper function that returns true if article contains a match in any of the fields
+        def matches(article: Article) -> bool:
+            for author in article.Authors:
+                if pattern.search(author):
+                    return True
+
+            if pattern.search(article.Title):
+                return True
+
+            if pattern.search(article.Venue):
+                return True
+
+            if pattern.search(str(article.Year)):
+                return True
+
+            for keyword in article.Keywords:
+                if pattern.search(keyword):
+                    return True
+
+            return False
+
+        # build and return filtered list
+        return True, [a for a in self.ArticlesList if matches(a)]
