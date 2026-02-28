@@ -33,6 +33,12 @@ Screen {
     #search_row_search_input {
         width: 1fr; height: auto;
     }
+    #search_row_search_input.-invalid {
+        border: tall $error;
+    }
+    #search_row_search_input.-valid {
+        border: tall $success;
+    }
 }
 
 /* Main Body */

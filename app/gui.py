@@ -1,6 +1,7 @@
 # standard imports
 import os
 import platform
+import re
 import subprocess
 
 # textual imports
@@ -9,6 +10,21 @@ from textual.app import App, ComposeResult
 from textual.binding import Binding
 from textual.containers import Horizontal, Vertical, VerticalScroll
 from textual.widgets import Button, DataTable, Footer, Header, Input, Label, Markdown
+from textual.validation import Validator, ValidationResult
+
+# custom validator to validate regular expressions
+class RegexValidator(Validator):
+    def __init__(self, failure_description: str | None = None) -> None:
+        super().__init__(failure_description)
+        self.Pattern: re.Pattern | None = None
+
+    def validate(self, regex: str) -> ValidationResult:
+        try:
+            self.Pattern = re.compile(regex, re.IGNORECASE)
+            return self.success()
+        except re.error as exc:
+            self.Pattern = None
+            return self.failure(str(exc))
 
 # kuill imports
 import app.lib as lib
@@ -47,7 +63,7 @@ class KuillApp(App):
         self.SearchRow = Horizontal(id = "search_row")
         with self.SearchRow:
             self.SearchRowKeyLabel = Label(id = "search_row_key_label", content = "Search:")
-            self.SearchRowSearchInput = Input(id = "search_row_search_input", placeholder = "Author(s), Title, Venue, Year, Keywords")
+            self.SearchRowSearchInput = Input(id = "search_row_search_input", placeholder = "Author(s), Title, Venue, Year, Keywords", validators = [RegexValidator()])
             yield self.SearchRowKeyLabel
             yield self.SearchRowSearchInput
 
@@ -89,13 +105,9 @@ class KuillApp(App):
 
     @on(Input.Changed, "#search_row_search_input")
     def _on_search_row_search_input_changed(self) -> None:
-        isRegexValid, filteredArticlesList = self.Library.FilteredArticlesList()
-
-        if not isRegexValid:
-            # TODO: red search box
-            return
-        
-        self._refresh_results_table(filteredArticlesList)
+        if self.SearchRowSearchInput.is_valid:
+            filteredArticlesList = self.Library.FilteredArticlesList(self.SearchRowSearchInput.validators[0].Pattern)
+            self._refresh_results_table(filteredArticlesList)
 
     ###* Results Table & Details Panel Logic *###
 

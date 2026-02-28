@@ -75,19 +75,14 @@ class Library:
         self.LibraryFolderPath = os.path.dirname(libraryFilePath)
         self.ArticlesList = articlesList
 
-    def FilteredArticlesList(self, regex: str) -> tuple[bool, list[Article]]:
+    def FilteredArticlesList(self, pattern: re.Pattern) -> list[Article]:
         """
-        Return a list of :class:`Article` instances where at least one of the selected fields matches the provided regular expression.
+        Return a list of :class:`Article` instances where at least one of the selected fields matches the provided pattern.
 
         The fields examined are ``authors`` (each author name), ``title``, ``venue``, ``year`` and ``keywords`` (each keyword evaluated separately).
         
         The pattern can appear anywhere in the fields and matching is case-insensitive.
         """
-        
-        try:
-            pattern = re.compile(regex, re.IGNORECASE)
-        except:
-            return False, []
 
         # helper function that returns true if article contains a match in any of the fields
         def matches(article: Article) -> bool:
@@ -111,4 +106,4 @@ class Library:
             return False
 
         # build and return filtered list
-        return True, [a for a in self.ArticlesList if matches(a)]
+        return [a for a in self.ArticlesList if matches(a)]
