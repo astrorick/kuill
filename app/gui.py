@@ -128,6 +128,8 @@ class KuillApp(App):
     # render the details of the selected element of the results table in the details panel
     def _render_article_details(self) -> None:
         article = self._get_article_by_ID(self.ResultsTable.get_row_at(self.ResultsTable.cursor_row)[0])
+
+        # update markdown
         self.DetailsMarkdown.update(
             "\n\n".join(
                 [
@@ -142,6 +144,12 @@ class KuillApp(App):
                 ]
             )
         )
+
+        # enable/disable open pdf button based on pdf field
+        if article.PDF:
+            self.DetailsOpenPDFButton.disabled = False
+        else:
+            self.DetailsOpenPDFButton.disabled = True
     
     # action to execute when the selected row on the results table changes
     @on(DataTable.RowHighlighted, "#results_table")
