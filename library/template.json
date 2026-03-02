@@ -1,0 +1,37 @@
+{
+    "articles_list": [
+        {
+            "authors": ["First Author", "Second Author"],
+            "title": "Article Title",
+            "venue": "Conference or Journal",
+            "year": 2000,
+            "doi": "https://doi.org/XXXXX",
+            "keywords": ["keyword_1", "keyword_2"],
+            "added": "YYYY-MM-DD HH:MM:SS",
+            "pdf": "paper_filename.pdf",
+            "notes": "Your notes here."
+        },        
+        {
+            "authors": ["First Author", "Second Author", "Third Author"],
+            "title": "Article Title",
+            "venue": "Conference or Journal",
+            "year": 2000,
+            "doi": "https://doi.org/XXXXX",
+            "keywords": ["keyword_1", "keyword_2"],
+            "added": "YYYY-MM-DD HH:MM:SS",
+            "pdf": "paper_filename.pdf",
+            "notes": "Your notes here."
+        },
+        {
+            "authors": ["First Author"],
+            "title": "Article Title",
+            "venue": "Conference or Journal",
+            "year": 2000,
+            "doi": "https://doi.org/XXXXX",
+            "keywords": ["keyword_1", "keyword_2"],
+            "added": "YYYY-MM-DD HH:MM:SS",
+            "pdf": "paper_filename.pdf",
+            "notes": "Your notes here."
+        }
+    ]
+}
