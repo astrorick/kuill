@@ -87,7 +87,7 @@ class KuillApp(App):
 
     def on_mount(self) -> None:
         # set title and subtitle
-        self.title = "Kuill v0.1.2"
+        self.title = "Kuill v0.1.3"
         self.sub_title = "A simple open source tool to organize your scientific knowledge."
 
         # set border titles
