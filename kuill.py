@@ -1,8 +1,8 @@
 import sys
-from app.gui import KuillApp
+from app.tui import KuillApp
 
 def main():
-    app = KuillApp(libraryFilePath = sys.argv[1])
+    app = KuillApp(library_file_path = sys.argv[1])
     app.run()
 
 if __name__ == "__main__":

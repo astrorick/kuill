@@ -1,109 +1,106 @@
 import json
 import os
 import re
+from dataclasses import dataclass
 
+
+@dataclass
 class Article:
     """
-    The Article class represent a single bibliography entry in the library.
+    The :class:`Article` class represent a single bibliography entry in the library.
     """
 
-    ID: int
-    Authors: list[str]
-    Title: str
-    Venue: str
-    Year: int
-    DOI: str
-    Keywords: list[str]
-    Added: str
-    PDF: str
-    Notes: str
-
-    def __init__(self, id: int, authors: list[str], title: str, venue: str, year: int, doi: str, keywords: list[str], added: str, pdf: str, notes: str):
-        self.ID = id
-        self.Authors = authors
-        self.Title = title
-        self.Venue = venue
-        self.Year = year
-        self.DOI = doi
-        self.Keywords = keywords
-        self.Added = added
-        self.PDF = pdf
-        self.Notes = notes
+    id: int
+    authors: list[str]
+    title: str
+    venue: str
+    year: int
+    doi: str
+    keywords: list[str]
+    added: str
+    pdf: str
+    notes: str
 
 class Library:
     """
-    The Library class represents the full database object countaining all your entries plus additional data.
+    The :class:`Library` class represents the full database object countaining all your entries, plus additional data.
     """
     
-    LibraryFilePath: str # path to library file
-    LibraryFolderPath: str # path to library folder
-    ArticlesList: list[Article] # list of articles in library
+    library_file_path: str # path to library file
+    articles_list: list[Article] # list of articles in library
 
-    def __init__(self, libraryFilePath: str):
-        # verify the library file exists
-        if not os.path.exists(libraryFilePath):
-            raise FileNotFoundError(f"File not found '{libraryFilePath}'")
+    def __init__(self, library_file_path: str):
+        # verify that the provided library file exists
+        if not os.path.exists(library_file_path):
+            raise FileNotFoundError(f"File not found '{library_file_path}'.")
 
         # load data from library file
-        with open(libraryFilePath, "r", encoding = "utf-8") as libFile:
-            libData = json.load(libFile)
+        with open(library_file_path, "r", encoding = "utf-8") as lib_file:
+            lib_data = json.load(lib_file)
 
-        # ensure articles list key exists and is correct type
-        if "articles_list" not in libData or not isinstance(libData["articles_list"], list):
-            raise ValueError(f"Invalid library file '{libraryFilePath}'")
-        
-        # TODO: add checks for each article entry structure
+        # ensure articles list key exists and is of correct type
+        if "articles_list" not in lib_data or not isinstance(lib_data["articles_list"], list):
+            raise ValueError(f"Library file '{library_file_path}' is missing a valid 'articles_list' field of type 'list'.")
 
         # populate articles list with data
-        articlesList = []
-        for id, article in enumerate(libData["articles_list"]):
-            articlesList.append(Article(
-                id = id,
-                authors = article["authors"],
-                title = article["title"],
-                venue = article["venue"],
-                year = article["year"],
-                doi = article["doi"],
-                keywords = article["keywords"],
-                added = article["added"],
-                pdf = article["pdf"],
-                notes = article["notes"],
-            ))
+        articles_list = []
+        for id, article in enumerate(lib_data["articles_list"]):
+            articles_list.append(
+                Article(
+                    id = id,
+                    authors = article["authors"],
+                    title = article["title"],
+                    venue = article["venue"],
+                    year = article["year"],
+                    doi = article["doi"],
+                    keywords = article["keywords"],
+                    added = article["added"],
+                    pdf = article["pdf"],
+                    notes = article["notes"],
+                )
+            )
         
         # set class attributes
-        self.LibraryFilePath = libraryFilePath
-        self.LibraryFolderPath = os.path.dirname(libraryFilePath)
-        self.ArticlesList = articlesList
+        self.library_file_path = library_file_path
+        self.articles_list = articles_list
 
-    def FilteredArticlesList(self, pattern: re.Pattern) -> list[Article]:
+    def filtered_articles_list(self, regex: str) -> tuple[bool, list[Article]]:
         """
-        Return a list of :class:`Article` instances where at least one of the selected fields matches the provided pattern.
+        Filter articles by matching the provided regex against selected fields.
 
         The fields examined are ``authors`` (each author name), ``title``, ``venue``, ``year`` and ``keywords`` (each keyword evaluated separately).
-        
-        The pattern can appear anywhere in the fields and matching is case-insensitive.
+        The pattern can appear anywhere in a field and matching is case-insensitive.
+
+        Returns a tuple ``(valid, results)`` where ``valid`` is ``True`` if the regex compiled successfully
+        and ``results`` is the list of matching :class:`Article` instances, or an empty list if the regex is invalid.
         """
 
-        # helper function that returns true if article contains a match in any of the fields
+        # try to compile regex, return early if invalid
+        try:
+            pattern = re.compile(regex, re.IGNORECASE)
+        except re.error:
+            return (False, [])
+
+        # helper function that returns true if article contains a match in any of the fields, false otherwise
         def matches(article: Article) -> bool:
-            for author in article.Authors:
+            for author in article.authors:
                 if pattern.search(author):
                     return True
 
-            if pattern.search(article.Title):
+            if pattern.search(article.title):
                 return True
 
-            if pattern.search(article.Venue):
+            if pattern.search(article.venue):
                 return True
 
-            if pattern.search(str(article.Year)):
+            if pattern.search(str(article.year)):
                 return True
 
-            for keyword in article.Keywords:
+            for keyword in article.keywords:
                 if pattern.search(keyword):
                     return True
 
             return False
 
         # build and return filtered list
-        return [a for a in self.ArticlesList if matches(a)]
+        return (True, [a for a in self.articles_list if matches(a)])
