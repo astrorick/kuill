@@ -11,6 +11,7 @@ from textual.containers import Horizontal, Vertical, VerticalScroll
 from textual.widgets import Button, DataTable, Footer, Header, Input, Label, Markdown
 
 # kuill imports
+from app import __version__
 import app.lib as lib
 
 class KuillApp(App):
@@ -25,8 +26,10 @@ class KuillApp(App):
     ###* Initialization *###
 
     def __init__(self, library_file_path: str) -> None:
-        super().__init__() # init parent class
-        self.library = lib.Library(library_file_path = library_file_path) # load library from file
+        super().__init__()
+
+        # load library from file
+        self.library = lib.Library(library_file_path = library_file_path)
     
     ###* App Layout *###
 
@@ -71,7 +74,7 @@ class KuillApp(App):
 
     def on_mount(self) -> None:
         # set title and subtitle
-        self.title = "Kuill v0.1.3"
+        self.title = f"Kuill v{__version__}"
         self.sub_title = "A simple open source tool to organize your scientific knowledge."
 
         # set border titles
