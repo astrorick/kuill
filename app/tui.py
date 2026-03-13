@@ -139,7 +139,7 @@ class KuillApp(App):
         )
 
         # enable/disable open pdf button based on pdf field
-        if os.path.exists(article.pdf):
+        if os.path.exists(os.path.join(os.path.dirname(self.library.library_file_path), article.pdf)):
             self.details_open_pdf_button.disabled = False
         else:
             self.details_open_pdf_button.disabled = True
