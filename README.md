@@ -29,7 +29,7 @@ cd kuill
 pip install -r requirements.txt
 ```
 
-3. Run Kuill with a library file:
+3. Run `kuill.py` with a library file:
 
 ```bash
 python kuill.py library/your_lib_file.json
