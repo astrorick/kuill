@@ -8,8 +8,8 @@
             "doi": "https://doi.org/XXXXX",
             "keywords": ["keyword_1", "keyword_2"],
             "added": "YYYY-MM-DD HH:MM:SS",
-            "pdf": "paper_filename.pdf",
-            "notes": "Your notes here."
+            "pdf": "article_filename.pdf",
+            "notes": "Your personal notes here."
         },        
         {
             "authors": ["First Author", "Second Author", "Third Author"],
@@ -19,8 +19,8 @@
             "doi": "https://doi.org/XXXXX",
             "keywords": ["keyword_1", "keyword_2"],
             "added": "YYYY-MM-DD HH:MM:SS",
-            "pdf": "paper_filename.pdf",
-            "notes": "Your notes here."
+            "pdf": "article_filename.pdf",
+            "notes": "Your personal notes here."
         },
         {
             "authors": ["First Author"],
@@ -30,8 +30,8 @@
             "doi": "https://doi.org/XXXXX",
             "keywords": ["keyword_1", "keyword_2"],
             "added": "YYYY-MM-DD HH:MM:SS",
-            "pdf": "paper_filename.pdf",
-            "notes": "Your notes here."
+            "pdf": "article_filename.pdf",
+            "notes": "Your personal notes here."
         }
     ]
 }
