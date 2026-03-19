@@ -90,6 +90,7 @@ class KuillApp(App):
         self._refresh_results_table(self.library.articles_list)
         
         # focus search bar
+        self.search_row_query_input.add_class("-valid")
         self.search_row_query_input.focus()
 
     ###* Search Row Logic *###
