@@ -64,25 +64,24 @@ class Library:
         self.library_file_path = library_file_path
         self.articles_list = articles_list
 
-    def filtered_articles_list(self, regex: str) -> tuple[bool, list[Article]]:
+    def filtered_articles_list(self, query: str, use_regex: bool = False) -> tuple[bool, list[Article]]:
         """
-        Filter articles by matching the provided regex against selected fields.
+        Filter articles by matching the provided query against selected fields.
 
         The fields examined are ``authors`` (each author name), ``title``, ``venue``, ``year`` and ``keywords`` (each keyword evaluated separately).
         The pattern can appear anywhere in a field and matching is case-insensitive.
 
-        Returns a tuple ``(valid, results)`` where ``valid`` is ``True`` if the regex compiled successfully
-        and ``results`` is the list of matching :class:`Article` instances, or an empty list if the regex is invalid.
+        When ``use_regex`` is ``False`` (default), the query is split on whitespace and each token is matched literally.
+        All tokens must match at least one field for the article to be included (AND logic).
+
+        When ``use_regex`` is ``True``, the query is treated as a regular expression.
+
+        Returns a tuple ``(valid, results)`` where ``valid`` is ``True`` if the query is valid
+        and ``results`` is the list of matching :class:`Article` instances, or an empty list if the query is invalid.
         """
 
-        # try to compile regex, return early if invalid
-        try:
-            pattern = re.compile(regex, re.IGNORECASE)
-        except re.error:
-            return (False, [])
-
-        # helper function that returns true if article contains a match in any of the fields, false otherwise
-        def matches(article: Article) -> bool:
+        # helper function that returns true if a pattern matches any of the article fields
+        def matches_pattern(article: Article, pattern: re.Pattern) -> bool:
             for author in article.authors:
                 if pattern.search(author):
                     return True
@@ -102,5 +101,20 @@ class Library:
 
             return False
 
-        # build and return filtered list
-        return (True, [a for a in self.articles_list if matches(a)])
+        if use_regex:
+            # regex mode: compile as-is
+            try:
+                pattern = re.compile(query, re.IGNORECASE)
+            except re.error:
+                return (False, [])
+
+            return (True, [a for a in self.articles_list if matches_pattern(a, pattern)])
+        else:
+            # plain text mode: split on whitespace, escape each token, require all to match (AND logic)
+            tokens = query.split()
+            patterns = [re.compile(re.escape(token), re.IGNORECASE) for token in tokens]
+
+            def matches_all(article: Article) -> bool:
+                return all(matches_pattern(article, p) for p in patterns)
+
+            return (True, [a for a in self.articles_list if matches_all(a)])

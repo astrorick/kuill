@@ -33,6 +33,14 @@ Screen {
     #search_row_query_input {
         width: 1fr; height: auto;
     }
+    #search_row_switch_label {
+        width: auto; height: 100%;
+        content-align-vertical: middle;
+        margin: 0 1 0 1;
+    }
+    #search_row_regex_switch {
+        width: auto; height: auto;
+    }
     #search_row_query_input.-invalid {
         border: tall $error;
     }

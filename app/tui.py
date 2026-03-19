@@ -8,7 +8,7 @@ from textual import on
 from textual.app import App, ComposeResult
 from textual.binding import Binding
 from textual.containers import Horizontal, Vertical, VerticalScroll
-from textual.widgets import Button, DataTable, Footer, Header, Input, Label, Markdown
+from textual.widgets import Button, DataTable, Footer, Header, Input, Label, Markdown, Switch
 
 # kuill imports
 from app import __version__
@@ -51,8 +51,12 @@ class KuillApp(App):
         with self.search_row:
             self.search_row_key_label = Label(id = "search_row_key_label", content = "Search:")
             self.search_row_query_input = Input(id = "search_row_query_input", placeholder = "Author(s), Title, Venue, Year, Keywords")
+            self.search_row_switch_label = Label(id = "search_row_switch_label", content = "Regex:")
+            self.search_row_regex_switch = Switch(id = "search_row_regex_switch", value = False)
             yield self.search_row_key_label
             yield self.search_row_query_input
+            yield self.search_row_switch_label
+            yield self.search_row_regex_switch
 
         # main app body
         self.main_body = Horizontal(id = "main_body")
@@ -90,9 +94,8 @@ class KuillApp(App):
 
     ###* Search Row Logic *###
 
-    @on(Input.Changed, "#search_row_query_input")
-    def _on_search_row_query_input_changed(self) -> None:
-        valid, filtered_articles = self.library.filtered_articles_list(self.search_row_query_input.value)
+    def _run_search(self) -> None:
+        valid, filtered_articles = self.library.filtered_articles_list(self.search_row_query_input.value, use_regex = self.search_row_regex_switch.value)
         if valid:
             self.search_row_query_input.remove_class("-invalid")
             self.search_row_query_input.add_class("-valid")
@@ -100,6 +103,14 @@ class KuillApp(App):
         else:
             self.search_row_query_input.remove_class("-valid")
             self.search_row_query_input.add_class("-invalid")
+
+    @on(Input.Changed, "#search_row_query_input")
+    def _on_search_row_query_input_changed(self) -> None:
+        self._run_search()
+
+    @on(Switch.Changed, "#search_row_regex_switch")
+    def _on_search_row_regex_switch_changed(self) -> None:
+        self._run_search()
 
     ###* Results Table & Details Panel Logic *###
 
