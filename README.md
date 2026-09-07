@@ -49,10 +49,9 @@ The library is a JSON file containing an `articles_list` array. Each entry of th
     "year": 2000,
     "doi": "https://doi.org/XXXXXX",
     "keywords": ["first keyword", "second keyword"],
-    "date_added": "YYYY-MM-DD HH:MM:SS",
-    "read_status": "pending",
-    "notes": "Your personal notes here.",
-    "pdf": "article_filename.pdf"
+    "added": "YYYY-MM-DD HH:MM:SS",
+    "pdf": "article_filename.pdf",
+    "notes": "Your personal notes here."
 }
 ```
 

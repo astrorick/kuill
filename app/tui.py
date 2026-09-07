@@ -43,8 +43,10 @@ class KuillApp(App):
         with self.library_info_row:
             self.library_info_row_key_label = Label(id = "library_info_row_key_label", content = "Library File:")
             self.library_info_row_value_label = Label(id = "library_info_row_value_label", content = self.library.library_file_path)
+            self.library_info_row_reload_button = Button(id = "library_info_row_reload_button", label = "Reload")
             yield self.library_info_row_key_label
             yield self.library_info_row_value_label
+            yield self.library_info_row_reload_button
 
         # search row
         self.search_row = Horizontal(id = "search_row")
@@ -93,6 +95,29 @@ class KuillApp(App):
         self.search_row_query_input.add_class("-valid")
         self.search_row_query_input.focus()
 
+    ###* Library Info Row Logic *###
+
+    # reload the library from file, keeping the currently loaded one if the file cannot be read
+    def _reload_library(self) -> None:
+        try:
+            library = lib.Library(library_file_path = self.library.library_file_path)
+        except (OSError, ValueError, KeyError, TypeError) as error:
+            self.notify(title = "Reload Failed!", message = str(error), severity = "error")
+            return
+
+        # only update if no error raised
+        self.library = library
+
+        # clear the search box and repopulate the results table with the reloaded entries
+        self.search_row_query_input.value = ""
+        self._run_search()
+
+        self.notify(title = "Library Reloaded", message = f"{len(self.library.articles_list)} entries loaded from file.")
+
+    @on(Button.Pressed, "#library_info_row_reload_button")
+    def _on_library_info_row_reload_button_pressed(self) -> None:
+        self._reload_library()
+
     ###* Search Row Logic *###
 
     def _run_search(self) -> None:
@@ -128,7 +153,12 @@ class KuillApp(App):
                 article.year,
                 ", ".join(article.keywords),
             )
-    
+
+        # no row gets highlighted on an empty table, so clear the details panel by hand in that case
+        if not articles_list:
+            self.details_markdown.update("")
+            self.details_open_pdf_button.disabled = True
+
     # render the details of the selected element of the results table in the details panel
     def _render_article_details(self) -> None:
         article = self._get_article_by_id(self.results_table.get_row_at(self.results_table.cursor_row)[0])
@@ -144,7 +174,7 @@ class KuillApp(App):
                     f"**DOI:** {article.doi}",
                     f"**Keywords:** {', '.join(article.keywords)}",
                     f"**Added**: {article.added}",
-                    f"**PDF Path:** {article.pdf}",
+                    f"**PDF:** {article.pdf}",
                     f"**Notes**: {article.notes}"
                 ]
             )

@@ -17,6 +17,21 @@ Screen {
         width: auto; height: 100%;
         text-style: bold; color: $primary
     }
+    #library_info_row_reload_button {
+        width: auto; height: 1; min-width: 0;
+        border: none;
+        padding: 0 1 0 1; margin: 0 0 0 2;
+        background: $primary; color: $text;
+
+        &:hover {
+            border: none;
+            background: $primary-lighten-2;
+        }
+        &.-active {
+            border: none;
+            background: $primary-darken-2;
+        }
+    }
 }
 
 /* Search Row */
