@@ -35,7 +35,7 @@ pip install -r requirements.txt
 python kuill.py library/your_lib_file.json
 ```
 
-A template library file is provided as `library_template.json` to help you get started.
+A template library file is provided as `template_library.json` to help you get started.
 
 ## Kuill Library Format
 
