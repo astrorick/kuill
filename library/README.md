@@ -1,3 +1,3 @@
 # Library
 
-This is the main kuill library folder. Start from the provided database `template.json` to build your knowledge.
+This is the main Kuill library folder. Start from the provided `library_template.json` to build your knowledge.

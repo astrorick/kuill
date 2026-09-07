@@ -1,0 +1,40 @@
+{
+    "articles_list": [
+        {
+            "authors": ["First Author", "Second Author", "Third Author", "..."],
+            "title": "Title of Article",
+            "venue": "Conference or Journal",
+            "year": 2000,
+            "doi": "https://doi.org/XXXXXX",
+            "keywords": ["first keyword", "second keyword"],
+            "date_added": "YYYY-MM-DD HH:MM:SS",
+            "read_status": "pending",
+            "notes": "Your personal notes here.",
+            "pdf": "article_filename.pdf"
+        },
+        {
+            "authors": ["First Author", "Second Author", "Third Author", "..."],
+            "title": "Title of Article",
+            "venue": "Conference or Journal",
+            "year": 2000,
+            "doi": "https://doi.org/XXXXXX",
+            "keywords": ["first keyword", "second keyword"],
+            "date_added": "YYYY-MM-DD HH:MM:SS",
+            "read_status": "pending",
+            "notes": "Your personal notes here.",
+            "pdf": "article_filename.pdf"
+        },
+        {
+            "authors": ["First Author", "Second Author", "Third Author", "..."],
+            "title": "Title of Article",
+            "venue": "Conference or Journal",
+            "year": 2000,
+            "doi": "https://doi.org/XXXXXX",
+            "keywords": ["first keyword", "second keyword"],
+            "date_added": "YYYY-MM-DD HH:MM:SS",
+            "read_status": "pending",
+            "notes": "Your personal notes here.",
+            "pdf": "article_filename.pdf"
+        }
+    ]
+}

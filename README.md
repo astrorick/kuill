@@ -35,31 +35,32 @@ pip install -r requirements.txt
 python kuill.py library/your_lib_file.json
 ```
 
-A template library file is provided at `library/template.json` to help you get started.
+A template library file is provided as `library_template.json` to help you get started.
 
-## Library Format
+## Kuill Library Format
 
-The library is a JSON file containing an `articles_list` array. Each entry must have the following fields:
+The library is a JSON file containing an `articles_list` array. Each entry of the array must be a JSON object with the following fields:
 
 ```json
 {
-    "authors": ["First Author", "Second Author"],
-    "title": "Article Title",
+    "authors": ["First Author", "Second Author", "Third Author", "..."],
+    "title": "Title of Article",
     "venue": "Conference or Journal",
     "year": 2000,
-    "doi": "https://doi.org/XXXXX",
-    "keywords": ["keyword_1", "keyword_2"],
-    "added": "YYYY-MM-DD HH:MM:SS",
-    "pdf": "article_filename.pdf",
-    "notes": "Your personal notes here."
+    "doi": "https://doi.org/XXXXXX",
+    "keywords": ["first keyword", "second keyword"],
+    "date_added": "YYYY-MM-DD HH:MM:SS",
+    "read_status": "pending",
+    "notes": "Your personal notes here.",
+    "pdf": "article_filename.pdf"
 }
 ```
 
-PDF paths are relative to the directory containing the library file.
+All PDF paths are relative to the directory containing the library file (usually, the `library` folder).
 
 ## Contributing
 
-Contributions are welcome! Feel free to open an issue or submit a pull request on [GitHub](https://github.com/astrorick/kuill).
+Contributions are very welcome. Feel free to open an issue or submit a pull request on [GitHub](https://github.com/astrorick/kuill).
 
 ## License
 
