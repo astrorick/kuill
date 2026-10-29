@@ -142,6 +142,11 @@ class KuillApp(App):
 
     # refresh results table entries
     def _refresh_results_table(self, articles_list: list[lib.Article]) -> None:
+        # remember the highlighted article so the cursor can be restored after repopulating
+        selected_id = None
+        if self.results_table.row_count:
+            selected_id = self.results_table.get_row_at(self.results_table.cursor_row)[0]
+
         self.results_block.border_title = f"Results Table - {len(articles_list)}/{len(self.library.articles_list)}"
         self.results_table.clear()
         for article in articles_list:
@@ -153,6 +158,11 @@ class KuillApp(App):
                 article.year,
                 ", ".join(article.keywords),
             )
+
+        # move the cursor back onto the previously highlighted article, if it is still listed
+        selected_row = next((i for i, a in enumerate(articles_list) if a.id == selected_id), None)
+        if selected_row is not None:
+            self.results_table.move_cursor(row = selected_row)
 
         # no row gets highlighted on an empty table, so clear the details panel by hand in that case
         if not articles_list:
